@@ -1,0 +1,27 @@
+{
+    "variants" : 
+    [
+        {
+            "maxMBCount" : "",            
+            "rpd_config" : {
+                "decimation:defaultTarget" : "f:20000"
+            },
+            "outputFileSuffix" : "_lod0",
+            "outputFileExtension" : "glb"
+        },
+        {
+            "maxMBCount" : "",
+            "rpd_config" : {
+                "decimation:defaultTarget" : "f:1234" 
+            },
+            "outputFileSuffix" : "_lod1",
+            "outputFileExtension" : "obj"
+        },
+        {
+            "maxMBCount" : 0.5,            
+            "rpd_config" : {},
+            "outputFileSuffix" : "_lod2",
+            "outputFileExtension" : "glb"
+        }
+    ]
+}
