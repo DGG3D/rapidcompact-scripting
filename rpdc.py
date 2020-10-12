@@ -26,7 +26,6 @@ OPTIMIZE_MODEL_ENDPOINT     = "rawmodel/process/{id}"
 CHECK_UPLOADSTATUS_ENDPOINT = "rawmodel/{id}"
 CHECK_OPTSTATUS_ENDPOINT    = "rapidmodel/{id}"
 
-AUTH_FILE = "auth.cache"
 
 # ################################ #  
 #         Helper Functions         #
@@ -80,62 +79,6 @@ def downloadFile(fileURL, outputFilePath):
        return False
 
     return True
-
-# #############################################################################       
-
-def loadTokenFromFile(baseUrl):
-    auth = {}
-    try:
-        with open(AUTH_FILE) as f:
-            auth = json.load(f)
-    except:
-        return None
-
-    if "access_token" not in auth or "expiration" not in auth or "base_url" not in auth:
-        return None
-
-    if auth["base_url"] != baseUrl:
-        return None
-
-    tokenExpiration = datetime.datetime.fromisoformat(auth["expiration"])
-    currentTimedate = datetime.datetime.now()
-    if tokenExpiration > currentTimedate:
-        return auth["access_token"]
-    else:
-        return None
-
-# #############################################################################       
-
-def login(credentials, baseUrl):
-    print("Logging in...")
-
-    cachedToken = loadTokenFromFile(baseUrl)
-    if cachedToken:
-        print("Using cached token")
-        return cachedToken
-
-    currentTimedate = datetime.datetime.now()
-
-    data = json.dumps(credentials).encode("utf8")
-    req = urllib.request.Request(baseUrl+LOGIN_ENDPOINT, data, headers={'content-type': 'application/json'})
-    responseJSON, code = getServerRequestJSON(req)
-    if not responseJSON or not 'access_token' in responseJSON:
-        return ""
-
-    print("Logged in.\n")
-
-    accessToken = responseJSON['access_token']
-    tokenExpiration = currentTimedate + datetime.timedelta(seconds=responseJSON["expires_in"])
-    authData = {"base_url":baseUrl,"access_token": accessToken, "expiration": tokenExpiration.isoformat()}
-
-    try:
-        with open(AUTH_FILE, 'w') as f:
-            json.dump(authData, f)
-    except e:
-       print(e)
-       print("Could not cache auth token")
-
-    return accessToken
 
 # #############################################################################
 
@@ -323,9 +266,9 @@ except:
     quit()
   
 
-# 1) perform login with user credentials via HTTPS
+# 1) obtain token from credentials file
 
-accessToken = login(userCredentials, baseUrl)
+accessToken = userCredentials["token"]
     
 # iterate over input directory OR use input file
 directoryMode = (modelFile.rfind(".") == -1)
