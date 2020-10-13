@@ -186,12 +186,14 @@ def uploadRawModel(modelFile, fileExt, uploadURLs, accessToken, baseUrl):
         print("Could not upload model file.")
         return False
 
-    upload_status = "unzipping"
+    
 
+    upload_status = ""
+    checkOptStatusURL = baseUrl+CHECK_UPLOADSTATUS_ENDPOINT.replace("{id}", str(id))
     # if this is a zip file, make sure that the server processed the file (unzipped)
     if fileExt == ".zip":
         print("Waiting for the server to unzip the model.")
-        checkOptStatusURL = baseUrl+CHECK_UPLOADSTATUS_ENDPOINT.replace("{id}", str(id))
+        upload_status = "unzipping"
 
         while upload_status == "unzipping":
             req = urllib.request.Request(checkOptStatusURL, headers=reqHeaders)
@@ -204,6 +206,19 @@ def uploadRawModel(modelFile, fileExt, uploadURLs, accessToken, baseUrl):
             upload_status = rJSON["data"]["upload_status"]
             time.sleep(1)
 
+    # wait for the model to be ready
+    print("Waiting for the server to analyse the model.")
+    while upload_status != "complete":
+        
+        req = urllib.request.Request(checkOptStatusURL, headers=reqHeaders)
+        rJSON, code = getServerRequestJSON(req)
+
+        if rJSON == None:
+            print("Could not get the raw model status.")
+            return False
+
+        upload_status = rJSON["data"]["upload_status"]
+        time.sleep(1)
 
     return True
 
