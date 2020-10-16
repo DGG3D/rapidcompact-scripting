@@ -9,7 +9,7 @@ To optimize one or multiple 3D models, to one or multiple target resolutions, si
 
 1. Make sure you have [Python 3](https://www.python.org/) installed.
 
-2. Edit "credentials.json" and enter the credentials of your RapidCompact account.  
+2. Edit "credentials.json" and enter your [API token](https://app.rapidcompact.com/app/api-tokens).  
   ![Illustration of Step 2](/tutorial/quick-intro/images/step2.JPG)
 
 3. Edit the "variants.json" file to specify the desired resolution and output formats for your models (or keep it as-is for a first test run).  
