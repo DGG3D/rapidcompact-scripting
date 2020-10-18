@@ -26,7 +26,6 @@ OPTIMIZE_MODEL_ENDPOINT     = "rawmodel/process/{id}"
 CHECK_UPLOADSTATUS_ENDPOINT = "rawmodel/{id}"
 CHECK_OPTSTATUS_ENDPOINT    = "rapidmodel/{id}"
 
-AUTH_FILE = "auth.cache"
 
 # ################################ #  
 #         Helper Functions         #
@@ -80,62 +79,6 @@ def downloadFile(fileURL, outputFilePath):
        return False
 
     return True
-
-# #############################################################################       
-
-def loadTokenFromFile(baseUrl):
-    auth = {}
-    try:
-        with open(AUTH_FILE) as f:
-            auth = json.load(f)
-    except:
-        return None
-
-    if "access_token" not in auth or "expiration" not in auth or "base_url" not in auth:
-        return None
-
-    if auth["base_url"] != baseUrl:
-        return None
-
-    tokenExpiration = datetime.datetime.fromisoformat(auth["expiration"])
-    currentTimedate = datetime.datetime.now()
-    if tokenExpiration > currentTimedate:
-        return auth["access_token"]
-    else:
-        return None
-
-# #############################################################################       
-
-def login(credentials, baseUrl):
-    print("Logging in...")
-
-    cachedToken = loadTokenFromFile(baseUrl)
-    if cachedToken:
-        print("Using cached token")
-        return cachedToken
-
-    currentTimedate = datetime.datetime.now()
-
-    data = json.dumps(credentials).encode("utf8")
-    req = urllib.request.Request(baseUrl+LOGIN_ENDPOINT, data, headers={'content-type': 'application/json'})
-    responseJSON, code = getServerRequestJSON(req)
-    if not responseJSON or not 'access_token' in responseJSON:
-        return ""
-
-    print("Logged in.\n")
-
-    accessToken = responseJSON['access_token']
-    tokenExpiration = currentTimedate + datetime.timedelta(seconds=responseJSON["expires_in"])
-    authData = {"base_url":baseUrl,"access_token": accessToken, "expiration": tokenExpiration.isoformat()}
-
-    try:
-        with open(AUTH_FILE, 'w') as f:
-            json.dump(authData, f)
-    except e:
-       print(e)
-       print("Could not cache auth token")
-
-    return accessToken
 
 # #############################################################################
 
@@ -338,22 +281,28 @@ except:
     quit()
   
 
-# 1) perform login with user credentials via HTTPS
+# 1) obtain token from credentials file
 
-accessToken = login(userCredentials, baseUrl)
-    
+accessToken = userCredentials["token"]
+
 # iterate over input directory OR use input file
-directoryMode = (modelFile.rfind(".") == -1)
+directoryMode = os.path.isdir(modelFile)
 filesToProcess =[]
 
 if directoryMode:
+    print("Running in directory mode.")
     filesToProcess = os.listdir(modelFile)
+    # to streamline code below, add the path prefix, just like in single-file mode
+    for i in range(0, len(filesToProcess)):
+        filesToProcess[i] = os.path.join(modelFile, filesToProcess[i])
 else:
+    print("Running in single-file mode.")
     filesToProcess = [modelFile]
 
 for nextModelFile in filesToProcess:
-
-    nextModelFileWithoutExt = nextModelFile[0:nextModelFile.rfind('.')]
+    
+    nextModelFileWithoutExt        = nextModelFile[0:nextModelFile.rfind('.')]
+    nextModelFileWithoutExtAndPath = os.path.basename(nextModelFileWithoutExt)
 
     if (accessToken == ""):
         print("Couldn't log in. Are your credentials valid?")
@@ -376,10 +325,7 @@ for nextModelFile in filesToProcess:
             
 
         # 3) upload model into the "RawModels" section, or take existing ID
-        if directoryMode:        
-            success = uploadRawModel(modelFile + "/" + nextModelFile, fileExt, uploadURLs, accessToken, baseUrl)
-        else:
-            success = uploadRawModel(nextModelFile, fileExt, uploadURLs, accessToken, baseUrl)
+        success = uploadRawModel(nextModelFile, fileExt, uploadURLs, accessToken, baseUrl)
 
         if (success == False):
             print("Couldn't upload raw model.")
@@ -405,9 +351,9 @@ for nextModelFile in filesToProcess:
         extension  = variant["outputFileExtension"]
 
         if (extension == "obj"):
-            outputModelFile = "output/" + nextModelFileWithoutExt + variant["outputFileSuffix"] + ".zip"
+            outputModelFile = "output/" + nextModelFileWithoutExtAndPath + variant["outputFileSuffix"] + ".zip"
         else:
-            outputModelFile = "output/" + nextModelFileWithoutExt + variant["outputFileSuffix"] + "." + extension
+            outputModelFile = "output/" + nextModelFileWithoutExtAndPath + variant["outputFileSuffix"] + "." + extension
             
         if (mbCount != "" and (mbCountF > 25.0 or mbCountF < 0.1)):
             print("Warning: MB count must be a value between 0.1 and 25. Skipping Variant.")
