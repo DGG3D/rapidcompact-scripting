@@ -12,7 +12,12 @@ import json
 import time
 import datetime
 from argparse import ArgumentParser
-        
+
+
+# add the jsonschema package (locally, so users don't have to know pip etc.)
+sys.path.insert(0, os.path.abspath("schema/"))
+import jsonschema
+
         
 # ################################ #  
 # RapidCompact.Cloud API endpoints #
@@ -22,7 +27,7 @@ from argparse import ArgumentParser
 LOGIN_ENDPOINT              = "login"
 PRESIGNED_FETCH_ENDPOINT    = "rawmodel/api-upload/start"
 FINALIZE_RAWMODEL_ENDPOINT  = "rawmodel/{id}/api-upload/complete"
-OPTIMIZE_MODEL_ENDPOINT     = "rawmodel/process/{id}"
+OPTIMIZE_MODEL_ENDPOINT     = "rawmodel/optimize/{id}"
 CHECK_UPLOADSTATUS_ENDPOINT = "rawmodel/{id}"
 CHECK_OPTSTATUS_ENDPOINT    = "rapidmodel/{id}"
 
@@ -32,18 +37,36 @@ CHECK_OPTSTATUS_ENDPOINT    = "rapidmodel/{id}"
 # ################################ #
 
 def executeServerRequest(request):
-    try:
-        response = urllib.request.urlopen(request)
-    except urllib.error.URLError as e:
+    try:    
+        response = urllib.request.urlopen(request)   
+    except urllib.error.URLError as e:    
+        print("******************************************************")
         if hasattr(e, "reason"):
             print("ERROR: Failed to fulfill the request.")
             print("Error code: ", e.code)
             print("Reason: ", e.reason)
-            return None, e.code
         elif hasattr(e, "code"):
             print("ERROR: The server couldn't fulfill the request.")
             print("Error code: ", e.code)
-            return None, e.code
+        try:
+            errorLines = e.readlines()
+            try:
+                serverErrors = json.loads(errorLines[0].decode("utf-8"))        
+                print("Server message: \"" + serverErrors["message"] + "\"")
+                print("Reported Errors:")
+                print(json.dumps(serverErrors["errors"], indent=2))
+            except:
+                # json parsing doesn't work - just try to print the string then
+                print("Server message: \"")
+                for errLine in errorLines:
+                    print(errLine.decode("utf-8"))                
+        except:
+            # we don't know how to parse the content
+            print(e.readlines())
+        print("******************************************************")
+        
+        return None, e.code
+        
     return response, response.getcode()
 
 # #############################################################################       
@@ -68,9 +91,8 @@ def downloadFile(fileURL, outputFilePath):
     req = urllib.request.Request(fileURL)
     response, code = executeServerRequest(req)
     if not response:
+        print("Error: No data received to write output file \"" + outputFilePath + "\".")
         return False
-
-
     try:
         with open(outputFilePath, 'wb') as f:
             f.write(response.read())
@@ -129,8 +151,6 @@ def uploadRawModel(modelFile, fileExt, uploadURLs, accessToken, baseUrl):
         print("Could not upload model file.")
         return False
 
-    
-
     upload_status = ""
     checkOptStatusURL = baseUrl+CHECK_UPLOADSTATUS_ENDPOINT.replace("{id}", str(id))
     # if this is a zip file, make sure that the server processed the file (unzipped)
@@ -164,33 +184,38 @@ def uploadRawModel(modelFile, fileExt, uploadURLs, accessToken, baseUrl):
         time.sleep(1)
 
     return True
-
+    
 # #############################################################################    
 
-def generateOptimizedVariant(modelID, outputFile, mbCountStr, configDict, accessToken, extension, baseUrl):
+def makeProgessBarStr(progress):
+    barStr    = "["
+    percSteps = 20
+    for i in range(1,percSteps+1):
+        if  progress >= i * 5:
+            barStr += "#"
+        else:
+            barStr += "_"
+    barStr += "]"
+    return barStr
+    
+# #############################################################################    
+
+def generateOptimizedVariant(modelID, outputModelFilePrefix, variant, accessToken, baseUrl):
     rawModelIDStr = str(modelID)
 
     reqHeaders = {'Authorization' : 'Bearer ' + accessToken,
                   'Content-Type' : 'application/json'}
 
-    configStr = json.dumps(configDict)
-    
     # submit optimization job    
-    payload = ""
+    payload = variant
     
-    if (mbCountStr != ""):
-        # payload = {"max_size_mb" : str(mbCountStr), "config" : configStr}
-        payload = {"max_size_mb" : float(mbCountStr), "config" : configStr}
-    else:
-        payload = {"config" : configStr}
-
     data = json.dumps(payload).encode("utf8")
-
+    
     print("Submitting optimization job ...")
     optimizedModelURL= baseUrl+OPTIMIZE_MODEL_ENDPOINT.replace("{id}", rawModelIDStr)
-    req = urllib.request.Request(optimizedModelURL, data=data, headers=reqHeaders)
+    req         = urllib.request.Request(optimizedModelURL, data=data, headers=reqHeaders)
     rJSON, code = getServerRequestJSON(req)
-
+        
     if rJSON == None:
         print("Could not submit optimization job.")
         return False
@@ -204,7 +229,7 @@ def generateOptimizedVariant(modelID, outputFile, mbCountStr, configDict, access
 
     checkOptStatusURL = baseUrl+CHECK_OPTSTATUS_ENDPOINT.replace("{id}", rapidModelIDStr)
     while (opt_status != "done"):
-        req = urllib.request.Request(checkOptStatusURL, headers=reqHeaders)
+        req         = urllib.request.Request(checkOptStatusURL, headers=reqHeaders)
         rJSON, code = getServerRequestJSON(req)
        
         # too many requests?
@@ -216,24 +241,88 @@ def generateOptimizedVariant(modelID, outputFile, mbCountStr, configDict, access
         if rJSON == None:
             print("Could not get the optimization status.")
             return False
-
+            
         if "data" in rJSON and "progress" in rJSON["data"]:
-            progress = rJSON["data"]["progress"]
-            print(f"\rProgress: {progress}%", end = '')
+            progress   = rJSON["data"]["progress"]
+            barDisplay = makeProgessBarStr(progress)
+            for i in range(3-len(str(progress))):
+                barDisplay += " "
+            pStep      = ""
+            if rJSON["data"]["processing_step"]:
+                pStep = "  |  " + rJSON["data"]["processing_step"]
+                for i in range(45-len(pStep)):
+                    pStep += " "
+            print(f"\rProgress: {barDisplay} {progress}%{pStep}", end = '')
 
         opt_status = rJSON["data"]["optimization_status"]
         if (opt_status != "sent_to_queue" and opt_status != "done"):
             print("Error: Unexpected status code from optimization run (" + opt_status + ").")
             return False
-        time.sleep(5)
+                
+        time.sleep(2)
     
-    print("\nCompleted.")
+    barDisplayFinal = makeProgessBarStr(100)    
+    print(f"\rProgress: {barDisplayFinal} 100%  |  Finished.                               \n", end = '')
 
-    downloadURL = rJSON["data"]["downloads"][extension]
+    exports      = variant["config"]["compressionAndExport"]["fileExports"]
+    downloadURLs = rJSON["data"]["downloads"]["all"]
+    
+    # name and download results
+    # using "downloads"->"all" is the most straightforward way,
+    # since each entry there corresponds to one entry in "fileExports"
+    # if you need to rename and differentiate between file formats,
+    # there are also individual lists / values for each file extension
+    i = 0
+    for key in downloadURLs: 
+        dlURL    = downloadURLs[key]
+        fileType = exports[i]["fileType"]
+        
+        fileExt  = fileType        
+        if (fileType == "obj" or fileType == "gltf"):
+            fileExt = ".zip"        
+        
+        filenameSuffix = "_e" + str(i) + "." + fileExt        
+        downloadFile(dlURL, outputModelFilePrefix + filenameSuffix)
 
-    # download result
-    return downloadFile(downloadURL, outputFile)
+        i += 1
+        
+# #############################################################################    
 
+def validateJSONWithAPISchema(variantConfig, schemaFile):
+    schema = None    
+    try:
+        with open(schemaFile) as f:
+            schema = json.load(f)            
+    except:
+        print("Error: Unable to validate configuration against schema: schema couldn't be read from file \"" + schemaFile + "\".")
+        return False
+  
+    try:
+        jsonschema.validate(variantConfig, schema)
+        print("Variant configuration passed validation.")
+        return True        
+    except Exception as e:
+        print("Error: Variant configuration is not valid - see JSON validation report on how to fix this:")
+        print("********************************************************************************")
+        print(e)
+        print("********************************************************************************")
+  
+    return False
+
+# #############################################################################    
+
+def validateJSONConfigContent(variantConfig):
+    exports = variantConfig["compressionAndExport"]["fileExports"]
+    
+    exportType0 = exports[0]["fileType"]
+    
+    # the V1 currently expects the first export to always be in glb format
+    if (exportType0 != "glb"):
+        print("Error when checking additional constraint: With API V1, first export must be \"glb\" (given: \"" + exportType0 + "\").")
+        return False
+    
+    return True
+    
 
 # ################################ #  
 #           Main Program           #
@@ -336,30 +425,23 @@ for nextModelFile in filesToProcess:
 
     # 4) create optimized variants
 
-    for variant in userVariants["variants"]:
-        mbCount  = str(variant["maxMBCount"])
-        mbCountF = 0.0
-        
-        if (mbCount != ""):
-            mbCountF = float(mbCount)
+    variantIdx = 0
+    
+    for variantName in userVariants["variants"]:
+    
+        variant = userVariants["variants"][variantName]
         
         # check if output folder exists
         if not os.path.isdir("output"):
             os.mkdir("output")
+        
+        outputModelFilePrefix = "output/" + nextModelFileWithoutExtAndPath + "_" + variantName
+        
+        print("Producing asset variant \"" + variantName + "\".")
+        
+        if (validateJSONWithAPISchema(variant["config"], "schema/raw-optimize_schema_v1.json")):
+            if (validateJSONConfigContent(variant["config"])):
+                generateOptimizedVariant(modelID, outputModelFilePrefix, variant, accessToken, baseUrl)            
 
-        configDict = variant["rpd_config"]
-        extension  = variant["outputFileExtension"]
-
-        if (extension == "obj"):
-            outputModelFile = "output/" + nextModelFileWithoutExtAndPath + variant["outputFileSuffix"] + ".zip"
-        else:
-            outputModelFile = "output/" + nextModelFileWithoutExtAndPath + variant["outputFileSuffix"] + "." + extension
+        variantIdx += 1
             
-        if (mbCount != "" and (mbCountF > 25.0 or mbCountF < 0.1)):
-            print("Warning: MB count must be a value between 0.1 and 25. Skipping Variant.")
-        else:
-            if (mbCount != ""):
-                print("Optimizing to " + mbCount + "MB.")
-            else:
-                print("Optimizing to given configuration.")
-            generateOptimizedVariant(modelID, outputModelFile, mbCount, configDict, accessToken, extension, baseUrl)            
