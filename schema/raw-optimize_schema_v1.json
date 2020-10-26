@@ -1,6 +1,6 @@
 {
   "$schema": "http://json-schema.org/schema#",
-  "$id": "http://api.rapidcompact.com/workflow.json",
+  "$id": "http://api.rapidcompact.com/api/rawmodel/optimize",
   "type": "object",
   "properties": {
     "workflowSettings": {
