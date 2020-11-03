@@ -1,7 +1,7 @@
 # check python version, this script requires python3
 import sys
-if sys.version_info[0] < 3:
-    print('ERROR: This script requires Python 3')
+if sys.version_info[0] < 3 or (sys.version_info[0] == 3 and sys.version_info[1] < 8):
+    print('ERROR: This script requires Python 3.8 or higher')
     sys.exit(1)
 
 import urllib.request
