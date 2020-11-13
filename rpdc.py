@@ -14,7 +14,8 @@ import datetime
 from argparse import ArgumentParser
 
 
-# add the jsonschema package (locally, so users don't have to know pip etc.)
+# add the six and jsonschema packages (locally, so users don't have to know pip etc.)
+sys.path.insert(0, os.path.abspath("schema/six"))
 sys.path.insert(0, os.path.abspath("schema/"))
 import jsonschema
 
