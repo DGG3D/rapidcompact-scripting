@@ -1,0 +1,287 @@
+{
+  "$schema": "http://json-schema.org/schema#",
+  "$id": "http://api.rapidcompact.com/api/rawmodel/optimize",
+  "type": "object",
+  "properties": {
+    "workflowSettings": {
+      "oneOf": [{
+          "type": "object",
+          "properties": {
+            "targetMeshResolution": {
+              "type": "object",
+              "description": "Maximum resolution for mesh.",
+              "oneOf": [{
+                  "properties": {
+                    "faceCount": {
+                      "type": "integer",
+                      "minimum": 1
+                    }
+                  },
+                  "required": ["faceCount"]
+                },
+                {
+                  "properties": {
+                    "facePercentage": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 100
+                    }
+                  },
+                  "required": ["facePercentage"]
+                }
+              ]
+            },
+            "targetTextureResolution": {
+              "type": "object",
+              "properties": {
+                "baseColor": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 16384
+                },
+                "emissive": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 16384
+                },
+                "normal": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 16384
+                },
+                "orm": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 16384
+                }
+              },
+              "required": [
+                "baseColor",
+                "emissive",
+                "normal",
+                "orm"
+              ]
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "targetMeshResolution",
+            "targetTextureResolution"
+          ]
+
+        },
+        {
+          "type": "object",
+          "properties": {
+            "targetMBSize": {
+              "type": "number",
+              "minimum": 0.001
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "targetMBSize"
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "targetSize": {
+              "type": "number",
+              "minimum": 0.001
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "targetSize"
+          ]
+        }
+      ]
+    },
+    "assetSimplification": {
+      "type": "object",
+      "properties": {
+        "meshDecimation": {
+          "type": "object",
+          "properties": {
+            "method": {
+              "enum": [
+                "rebake",
+                "preserveTiling"
+              ]
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "method"
+          ]
+        },
+        "topologySettings": {
+          "type": "object",
+          "properties": {
+            "vertexMergingDistance": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 0.1
+            },
+            "meshDensityEqualization": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "boundaryPreservationFactor": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "meshDensityEqualization",
+            "vertexMergingDistance"
+          ]
+        },
+        "uvAndAtlasSettings": {
+          "type": "object",
+          "properties": {
+            "uvStretchTolerance": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "uvStretchTolerance"
+          ]
+        },
+        "materialAndTextureBaking": {
+          "type": "object",
+          "properties": {
+            "bakingQuality": {
+              "enum": [
+                "low",
+                "medium",
+                "high"
+              ]
+            },
+            "bakeNormalMap": {
+              "type": "boolean"
+            },
+            "bakeAOMap": {
+              "type": "boolean"
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "bakeAOMap",
+            "bakeNormalMap",
+            "bakingQuality"
+          ]
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "materialAndTextureBaking",
+        "meshDecimation",
+        "topologySettings",
+        "uvAndAtlasSettings"
+      ]
+    },
+    "compressionAndExport": {
+      "type": "object",
+      "properties": {
+        "fileExports": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "fileType": {
+                "enum": [
+                  "glb",
+                  "gltf",
+                  "usdz",
+                  "obj",
+                  "stl",
+                  "ply",
+                  "ctm"
+                ]
+              },
+              "meshCompressionMethod": {
+                "enum": [
+                  "none",
+                  "draco",
+                  "dracoLossy"
+                ]
+              },
+              "customScaling": {
+                "type": "number"
+              },
+              "textureFormat": {
+                "type": "object",
+                "properties": {
+                  "baseColor": {
+                    "enum": [
+                      "auto",
+                      "jpg",
+                      "png",
+                      "ktx2"
+                    ]
+                  },
+                  "emissive": {
+                    "enum": [
+                      "auto",
+                      "jpg",
+                      "png",
+                      "ktx2"
+                    ]
+                  },
+                  "normal": {
+                    "enum": [
+                      "auto",
+                      "jpg",
+                      "png",
+                      "ktx2"
+                    ]
+                  },
+                  "orm": {
+                    "enum": [
+                      "auto",
+                      "jpg",
+                      "png",
+                      "ktx2"
+                    ]
+                  }
+                },
+                "additionalProperties": false,
+                "required": [
+                  "baseColor",
+                  "emissive",
+                  "normal",
+                  "orm"
+                ]
+              },
+              "scaleFactor": {
+                "type": "number"
+              }
+            },
+            "additionalProperties": false,
+            "required": [
+              "fileType"
+            ]
+          }
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "fileExports"
+      ]
+    }
+  },
+  "additionalProperties": false,
+  "required": [
+    "assetSimplification",
+    "compressionAndExport",
+    "workflowSettings"
+  ]
+}
