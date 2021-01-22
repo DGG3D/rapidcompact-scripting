@@ -1,6 +1,6 @@
 {
   "$schema": "http://json-schema.org/schema#",
-  "$id": "http://api.rapidcompact.com/api/rawmodel/optimize",
+  "$id": "https://api.rapidcompact.com/api/rawmodel/optimize",
   "type": "object",
   "properties": {
     "workflowSettings": {
@@ -115,6 +115,21 @@
           "required": [
             "method"
           ]
+        },
+        "sceneStructureOptimization": {
+          "type": "object",
+          "optional": "true",
+          "properties": {
+            "nodeTreePreservation": {
+              "enum": [
+                "auto",
+                "preserveTransparency",
+                "preserveMaterialNodes",
+                "preserveAll",
+                "mergeAll"
+              ]
+            }
+          }
         },
         "topologySettings": {
           "type": "object",
