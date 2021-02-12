@@ -30,6 +30,6 @@ To optimize one or multiple 3D models, to one or multiple target resolutions, si
  
 ## Advanced Usage
 To learn more about the available parameters of the script, use the "help" function:  
-`python3 rpdc.py -h`  
+`python3 rpdc.py -h` or `python rpdc.py -h` (depending on your Python setup) 
 
 Also, feel free to browse the documented source code, which also helps you to set up your own RapidCompact API integration.
