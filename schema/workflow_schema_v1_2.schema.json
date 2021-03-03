@@ -1,0 +1,342 @@
+{
+  "$schema": "http://json-schema.org/schema#",
+  "$id": "https://api.rapidcompact.com/api/rawmodel/optimize",  
+  "type": "object",
+  "title": "RapidCompact Optimize Endpoint Configuration Schema v1.1",
+  "description": "Optimization parameters for a single assets (and possibly multiple outputs)",
+  "properties": {
+    "workflowSettings": {
+      "oneOf": [{
+          "type": "object",
+          "title": "Polygon Count Target",
+          "description": "Specifies a target mesh resolution via a number of polygons",
+          "properties": {
+            "targetMeshResolution": {
+              "type": "object",
+              "title": "Target Mesh Resolution",
+              "description": "Maximum polygonal resolution for mesh",
+              "oneOf": [{
+                  "properties": {
+                    "faceCount": {
+                      "type": "integer",                      
+                      "description": "Target face count, as absolute number",
+                      "minimum": 1
+                    }
+                  },
+                  "required": ["faceCount"]
+                },
+                {
+                  "properties": {
+                    "facePercentage": {
+                      "type": "number",
+                      "description": "Target face count, as percentage of original number of faces",
+                      "minimum": 0,
+                      "maximum": 100
+                    }
+                  },
+                  "required": ["facePercentage"]
+                }
+              ]
+            },
+            "targetTextureResolution": {
+              "type": "object",
+              "title": "Target Texture Resolution",
+              "description": "Target texture resolution for different maps",
+              "properties": {
+                "baseColor": {
+                  "type": "integer",
+                  "description": "Desired resolution for base color map",
+                  "minimum": 1,
+                  "maximum": 16384
+                },
+                "emissive": {
+                  "type": "integer",
+                  "description": "Desired resolution for emissive map",
+                  "minimum": 1,
+                  "maximum": 16384
+                },
+                "normal": {
+                  "type": "integer",
+                  "description": "Desired resolution for normal map",
+                  "minimum": 1,
+                  "maximum": 16384
+                },
+                "orm": {
+                  "type": "integer",
+                  "description": "Desired resolution for ORM map",
+                  "minimum": 1,
+                  "maximum": 16384
+                }
+              },
+              "required": [
+                "baseColor",
+                "emissive",
+                "normal",
+                "orm"
+              ]
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "targetMeshResolution",
+            "targetTextureResolution"
+          ]
+
+        },
+        {
+          "type": "object",
+          "title": "Target MB Size",
+          "description": "Target asset file size, in MB",
+          "properties": {
+            "targetMBSize": {
+              "type": "number",
+              "minimum": 0.001
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "targetMBSize"
+          ]
+        },
+        {
+          "type": "object",
+          "title": "Target Size",
+          "description": "Alias for Target MB Size",
+          "properties": {
+            "targetSize": {
+              "type": "number",
+              "minimum": 0.001
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "targetSize"
+          ]
+        }
+      ]
+    },
+    "assetSimplification": {
+      "type": "object",
+      "title": "Asset Simplification",
+      "description": "Specifies how the asset should be simplified, including aspects such as node merging, tiling and atlasing, baking settings and more",
+      "properties": {
+        "meshDecimation": {
+          "type": "object",
+          "title": "Mesh Decimation Method",
+          "description": "Basic approach for decimation, regarding atlas baking vs. simplification, as well as regarding treatment of scene nodes",
+          "properties": {
+            "method": {
+              "enum": [
+                "rebake",
+                "preserveTiling",
+                "rebakePreserveNodes",
+                "preserveUVsAndNodes",
+                "dropTextures"
+              ]
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "method"
+          ]
+        },
+        "topologySettings": {
+          "type": "object",
+          "title": "Mesh and Topology Simplification",
+          "description": "Specifies detailed settings for mesh simplification",
+          "properties": {
+            "vertexMergingDistance": {
+              "type": "number",
+              "description": "Threshold for merging closeby vertices, relative size to a normalized bounding box size",
+              "minimum": 0,
+              "maximum": 0.1
+            },
+            "meshDensityEqualization": {
+              "type": "number",
+              "description": "Amount of equalization for the triangle distribution (lower values lead to better shape preservation)",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "boundaryPreservationFactor": {
+              "type": "number",
+              "description": "Amount of enforced preservation of mesh boundaries (balancing boundary shapre vs. preservation of details elsewhere) ",
+              "minimum": 0,
+              "maximum": 1
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "meshDensityEqualization",
+            "vertexMergingDistance"
+          ]
+        },
+        "uvAndAtlasSettings": {
+          "type": "object",
+          "title": "UVs and Atlasing",
+          "description": "Additional detail settings for UVs and atlasing",
+          "properties": {
+            "uvStretchTolerance": {
+              "type": "number",
+              "description": "Stretch tolerance for UVs (balancing stretch vs. number of charts)",
+              "minimum": 0,
+              "maximum": 1
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "uvStretchTolerance"
+          ]
+        },
+        "materialAndTextureBaking": {
+          "type": "object",
+          "title": "Material and Texture Baking",
+          "description": "Additional settings for texture baking",
+          "properties": {
+            "bakingQuality": {
+              "enum": [
+                "low",
+                "medium",
+                "high"
+              ]
+            },
+            "bakeNormalMap": {
+              "type": "boolean",
+              "description": "Flag to specify if a normal map should be baked or not"
+            },
+            "bakeAOMap": {
+              "type": "boolean",
+              "description": "Flag to specify if an AO map should be baked or not"
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "bakeAOMap",
+            "bakeNormalMap",
+            "bakingQuality"
+          ]
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "materialAndTextureBaking",
+        "meshDecimation",
+        "topologySettings",
+        "uvAndAtlasSettings"
+      ]
+    },
+    "compressionAndExport": {
+      "type": "object",
+      "title": "Compression and Export",
+      "description": "Settings for data compression and file export",
+      "properties": {
+        "fileExports": {
+          "type": "array",
+          "description": "List of desired file exports",
+          "items": {
+            "type": "object",
+            "description": "Settings for a single file export",
+            "properties": {
+              "fileType": {
+                "enum": [
+                  "glb",
+                  "gltf",
+                  "usdz",
+                  "obj",
+                  "stl",
+                  "ply",
+                  "ctm"
+                ]
+              },
+              "meshCompressionMethod": {
+                "enum": [
+                  "none",
+                  "draco",
+                  "dracoLossy"
+                ]
+              },
+              "customScaling": {
+                "type": "number",
+                "description": "Alias for scaleFactor"
+              },
+              "textureFormat": {
+                "type": "object",
+                "description": "Texture map format for export",
+                "properties": {
+                  "baseColor": {
+                    "enum": [
+                      "auto",
+                      "jpg",
+                      "png",
+                      "ktx2",
+                      "ktx",
+                      "ktx-basis-uastc",
+                      "ktx-basis-etcs1"
+                    ]
+                  },
+                  "emissive": {
+                    "enum": [
+                      "auto",
+                      "jpg",
+                      "png",
+                      "ktx2",
+                      "ktx",
+                      "ktx-basis-uastc",
+                      "ktx-basis-etcs1"
+                    ]
+                  },
+                  "normal": {
+                    "enum": [
+                      "auto",
+                      "jpg",
+                      "png",
+                      "ktx2",
+                      "ktx",
+                      "ktx-basis-uastc",
+                      "ktx-basis-etcs1"
+                    ]
+                  },
+                  "orm": {
+                    "enum": [
+                      "auto",
+                      "jpg",
+                      "png",
+                      "ktx2",
+                      "ktx",
+                      "ktx-basis-uastc",
+                      "ktx-basis-etcs1"
+                    ]
+                  }
+                },
+                "additionalProperties": false,
+                "required": [
+                  "baseColor",
+                  "emissive",
+                  "normal",
+                  "orm"
+                ]
+              },
+              "scaleFactor": {
+                "type": "number",
+                "description": "Custom scaling factor, if any (1 = no custom scaling)"
+              }
+            },
+            "additionalProperties": false,
+            "required": [
+              "fileType"
+            ]
+          }
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "fileExports"
+      ]
+    }
+  },
+  "additionalProperties": false,
+  "required": [
+    "assetSimplification",
+    "compressionAndExport",
+    "workflowSettings"
+  ]
+}

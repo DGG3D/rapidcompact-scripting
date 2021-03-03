@@ -19,6 +19,9 @@ sys.path.insert(0, os.path.abspath("schema/six"))
 sys.path.insert(0, os.path.abspath("schema/"))
 import jsonschema
 
+
+SchemaJSONPath = "schema/workflow_schema_v1_2.schema.json"
+
         
 # ################################ #  
 # RapidCompact.Cloud API endpoints #
@@ -318,7 +321,7 @@ def generateOptimizedVariant(modelID, outputModelFilePrefix, variant, accessToke
     # since each entry there corresponds to one entry in "fileExports"
     # if you need to rename and differentiate between file formats,
     # there are also individual lists / values for each file extension
-    i = 0
+    i = 0    
     for key in downloadURLs: 
         dlURL    = downloadURLs[key]
         fileType = exports[i]["fileType"]
@@ -466,7 +469,7 @@ for nextModelFile in filesToProcess:
             
             print("Validating configuration for variant \"" + variantName + "\".")
             
-            if (validateJSONWithAPISchema(variant["config"], "schema/raw-optimize_schema_v1_1.json", False)):
+            if (validateJSONWithAPISchema(variant["config"], SchemaJSONPath, False)):
                 allVariantsInvalid = False
         
         if (allVariantsInvalid):
@@ -513,7 +516,7 @@ for nextModelFile in filesToProcess:
         
         print("Producing asset variant \"" + variantName + "\".")
         
-        if (validateJSONWithAPISchema(variant["config"], "schema/raw-optimize_schema_v1_1.json", True)):
+        if (validateJSONWithAPISchema(variant["config"], SchemaJSONPath, True)):
             if (validateJSONConfigContent(variant["config"])):
                 resultRapidModelID = generateOptimizedVariant(modelID, outputModelFilePrefix, variant, accessToken, baseUrl)
                 if (resultRapidModelID != -1):
