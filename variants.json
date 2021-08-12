@@ -33,6 +33,10 @@
                         "bakeAOMap": false
                     }
                 },
+                "sceneManipulation": {
+                    "rotateZUp": false,
+                    "centerModel": false
+                },
                 "compressionAndExport": {
                     "fileExports": [
                         {
