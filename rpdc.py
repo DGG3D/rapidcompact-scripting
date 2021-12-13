@@ -22,8 +22,8 @@ import jsonschema
 
 SchemaJSONPath = "schema/workflow_schema_v1_3.schema.json"
 
-        
-# ################################ #  
+
+# ################################ #
 # RapidCompact.Cloud API endpoints #
 # ################################ #
 
@@ -36,14 +36,14 @@ BASE_ASSET_ENDPOINT        = "rawmodel/{id}"
 RAPID_MODEL_ENDPOINT       = "rapidmodel/{id}"
 
 
-# ################################ #  
+# ################################ #
 #         Helper Functions         #
 # ################################ #
 
 def executeServerRequest(request):
-    try:    
-        response = urllib.request.urlopen(request)   
-    except urllib.error.URLError as e:    
+    try:
+        response = urllib.request.urlopen(request)
+    except urllib.error.URLError as e:
         print("******************************************************")
         if hasattr(e, "reason"):
             print("ERROR: Failed to fulfill the request.")
@@ -55,7 +55,7 @@ def executeServerRequest(request):
         try:
             errorLines = e.readlines()
             try:
-                serverErrors = json.loads(errorLines[0].decode("utf-8"))        
+                serverErrors = json.loads(errorLines[0].decode("utf-8"))
                 print("Server message: \"" + serverErrors["message"] + "\"")
                 print("Reported Errors:")
                 print(json.dumps(serverErrors["errors"], indent=2))
@@ -63,21 +63,21 @@ def executeServerRequest(request):
                 # json parsing doesn't work - just try to print the string then
                 print("Server message: \"")
                 for errLine in errorLines:
-                    print(errLine.decode("utf-8"))                
+                    print(errLine.decode("utf-8"))
         except:
             # we don't know how to parse the content
             print(e.readlines())
         print("******************************************************")
-        
+
         return None, e.code
-        
+
     return response, response.getcode()
 
-# #############################################################################       
+# #############################################################################
 
 def getServerRequestJSON(request):
     response, code = executeServerRequest(request)
-    
+
     if not response:
         return None, code
 
@@ -89,7 +89,7 @@ def getServerRequestJSON(request):
 
     return rJSON, response.getcode()
 
-# #############################################################################       
+# #############################################################################
 
 def downloadFile(fileURL, outputFilePath):
     req = urllib.request.Request(fileURL)
@@ -100,7 +100,7 @@ def downloadFile(fileURL, outputFilePath):
     try:
         with open(outputFilePath, 'wb') as f:
             f.write(response.read())
-    except: 
+    except:
        print("Error: Cannot write to output file \"" + outputFilePath + "\".")
        return False
 
@@ -118,21 +118,21 @@ def getUploadURLs(fileExt, accessToken, modelLabel, baseUrl):
     req = urllib.request.Request(baseUrl+PRESIGNED_FETCH_ENDPOINT, data, headers=reqHeaders)
     responseJSON, code = getServerRequestJSON(req)
     return responseJSON
- 
-# #############################################################################       
- 
+
+# #############################################################################
+
 def uploadRawModel(modelFile, fileExt, uploadURLs, accessToken, baseUrl):
     dataModel = None
-  
+
     try:
-       dataModel = open(modelFile, 'rb') 
-    except IOError: 
+       dataModel = open(modelFile, 'rb')
+    except IOError:
        print("Error: cannot open model file \"" + modelFile + "\"")
-       return False  
-    
+       return False
+
     url_model = uploadURLs['links']['s3_upload_urls']['rapid' + fileExt]
     id        = uploadURLs['id']
-    
+
     # upload binary data via PUT
     print("Uploading model file ...")
     req = urllib.request.Request(url_model, data=dataModel.read(), method='PUT')
@@ -145,7 +145,7 @@ def uploadRawModel(modelFile, fileExt, uploadURLs, accessToken, baseUrl):
     # finalize model upload
     reqHeaders = {'Authorization' : 'Bearer ' + accessToken,
                   'Content-Type' : 'application/json'}
-    
+
     print("Inserting into base assets section ...")
     finalizeUploadURL= baseUrl+FINALIZE_RAWMODEL_ENDPOINT.replace("{id}", str(id))
     req = urllib.request.Request(finalizeUploadURL, headers=reqHeaders)
@@ -176,7 +176,7 @@ def uploadRawModel(modelFile, fileExt, uploadURLs, accessToken, baseUrl):
     # wait for the model to be ready
     print("Waiting for the server to analyse the model.")
     while upload_status != "complete":
-        
+
         req = urllib.request.Request(checkOptStatusURL, headers=reqHeaders)
         rJSON, code = getServerRequestJSON(req)
 
@@ -188,16 +188,16 @@ def uploadRawModel(modelFile, fileExt, uploadURLs, accessToken, baseUrl):
         time.sleep(1)
 
     return True
-    
-# #############################################################################       
- 
+
+# #############################################################################
+
 def deleteBaseAsset(id, accessToken):
     reqHeaders = {'Authorization' : 'Bearer ' + accessToken,
                   'Content-Type'  : 'application/json'}
-                  
+
     # delete base asset via DELETE
     print("Deleting base asset from cloud storage ...")
-    
+
     deleteURL = baseUrl+BASE_ASSET_ENDPOINT.replace("{id}", str(id))
 
     req = urllib.request.Request(deleteURL, headers=reqHeaders, method='DELETE')
@@ -210,7 +210,7 @@ def deleteBaseAsset(id, accessToken):
         print("Success.")
         return True
 
-# #############################################################################    
+# #############################################################################
 
 def deleteRapidModel(id, accessToken):
     reqHeaders = {'Authorization' : 'Bearer ' + accessToken,
@@ -218,7 +218,7 @@ def deleteRapidModel(id, accessToken):
 
     # delete base asset via DELETE
     print("Deleting optimized model from cloud storage ...")
-    
+
     deleteURL = baseUrl+RAPID_MODEL_ENDPOINT.replace("{id}", str(id))
 
     req = urllib.request.Request(deleteURL, headers=reqHeaders, method='DELETE')
@@ -243,8 +243,8 @@ def makeProgessBarStr(progress):
             barStr += "_"
     barStr += "]"
     return barStr
-    
-# #############################################################################    
+
+# #############################################################################
 
 def generateOptimizedVariant(modelID, outputModelFilePrefix, variant, accessToken, baseUrl):
     rawModelIDStr = str(modelID)
@@ -252,23 +252,23 @@ def generateOptimizedVariant(modelID, outputModelFilePrefix, variant, accessToke
     reqHeaders = {'Authorization' : 'Bearer ' + accessToken,
                   'Content-Type' : 'application/json'}
 
-    # submit optimization job    
+    # submit optimization job
     payload = variant
-    
+
     data = json.dumps(payload).encode("utf8")
-    
+
     print("Submitting optimization job ...")
     optimizedModelURL= baseUrl+OPTIMIZE_MODEL_ENDPOINT.replace("{id}", rawModelIDStr)
     req         = urllib.request.Request(optimizedModelURL, data=data, headers=reqHeaders)
     rJSON, code = getServerRequestJSON(req)
-        
+
     if rJSON == None:
         print("Could not submit optimization job.")
         return -1
-    
+
     rapidModelID    = rJSON["id"]
     rapidModelIDStr = str(rapidModelID)
-    
+
     # check model status
     print("Waiting for optimization to complete for rapid model " + rapidModelIDStr)
 
@@ -278,7 +278,7 @@ def generateOptimizedVariant(modelID, outputModelFilePrefix, variant, accessToke
     while (opt_status != "done"):
         req         = urllib.request.Request(checkOptStatusURL, headers=reqHeaders)
         rJSON, code = getServerRequestJSON(req)
-       
+
         # too many requests?
         if code == 429:
             print("Retrying in 30 seconds...")
@@ -288,7 +288,7 @@ def generateOptimizedVariant(modelID, outputModelFilePrefix, variant, accessToke
         if rJSON == None:
             print("Could not get the optimization status.")
             return -1
-            
+
         if "data" in rJSON and "progress" in rJSON["data"]:
             progress   = rJSON["data"]["progress"]
             barDisplay = makeProgessBarStr(progress)
@@ -305,80 +305,80 @@ def generateOptimizedVariant(modelID, outputModelFilePrefix, variant, accessToke
         if (opt_status != "sent_to_queue" and opt_status != "done"):
             print("Error: Unexpected status code from optimization run (" + opt_status + ").")
             return -1
-                
+
         time.sleep(2)
-    
+
     # optimization successful
-    
-    barDisplayFinal = makeProgessBarStr(100)    
+
+    barDisplayFinal = makeProgessBarStr(100)
     print(f"\rProgress: {barDisplayFinal} 100%  |  Finished.                               \n", end = '')
-    
+
     exports      = variant["config"]["compressionAndExport"]["fileExports"]
     downloadURLs = rJSON["data"]["downloads"]["all"]
-    
+
     # name and download results
     # using "downloads"->"all" is the most straightforward way,
     # since each entry there corresponds to one entry in "fileExports"
     # if you need to rename and differentiate between file formats,
     # there are also individual lists / values for each file extension
-    i = 0    
-    for key in downloadURLs: 
+    i = 0
+    for key in downloadURLs:
         dlURL    = downloadURLs[key]
         fileType = exports[i]["fileType"]
-        
-        fileExt  = fileType        
+
+        fileExt  = fileType
         if (fileType == "obj" or fileType == "gltf"):
-            fileExt = ".zip"        
-        
-        filenameSuffix = "_e" + str(i) + "." + fileExt        
+            fileExt = ".zip"
+
+        filenameSuffix = "_e" + str(i) + "." + fileExt
         downloadFile(dlURL, outputModelFilePrefix + filenameSuffix)
 
         i += 1
-        
+
     return rapidModelID
-        
-# #############################################################################    
+
+# #############################################################################
 
 def validateJSONWithAPISchema(variantConfig, schemaFile, silent):
-    schema = None    
+    schema = None
     try:
         with open(schemaFile) as f:
-            schema = json.load(f)            
+            schema = json.load(f)
     except:
         if (silent == False):
             print("Error: Unable to validate configuration against schema: schema couldn't be read from file \"" + schemaFile + "\".")
         return False
-  
+
     try:
         jsonschema.validate(variantConfig, schema)
         if (silent == False):
             print("Variant configuration passed validation.")
-        return True        
+        return True
     except Exception as e:
         if (silent == False):
             print("Error: Variant configuration is not valid - see JSON validation report on how to fix this:")
             print("********************************************************************************")
             print(e)
             print("********************************************************************************")
-  
+
     return False
 
-# #############################################################################    
+# #############################################################################
 
 def validateJSONConfigContent(variantConfig):
     exports = variantConfig["compressionAndExport"]["fileExports"]
-    
+
     exportType0 = exports[0]["fileType"]
-    
+
     # the V1 currently expects the first export to always be in glb format
     if (exportType0 != "glb"):
         print("Error when checking additional constraint: With API V1, first export must be \"glb\" (given: \"" + exportType0 + "\").")
         return False
-    
-    return True
-    
 
-# ################################ #  
+    return True
+
+
+# ################################ #
 #           Main Program           #
 # ################################ #
 
@@ -420,14 +420,14 @@ try:
 except:
     print("Unable to load and parse credentials JSON file \"" + credentialsFile + "\". Make sure the file exists and is valid JSON.")
     quit()
-        
+
 try:
     with open(variantsFile) as f:
         userVariants = json.load(f)
 except:
     print("Unable to load and parse variant definitions JSON file \"" + variantsFile + "\". Make sure the file exists and is valid JSON.")
     quit()
-  
+
 
 # 1) obtain token from credentials file
 
@@ -448,7 +448,7 @@ else:
     filesToProcess = [modelFile]
 
 for nextModelFile in filesToProcess:
-    
+
     nextModelFileWithoutExt        = nextModelFile[0:nextModelFile.rfind('.')]
     nextModelFileWithoutExtAndPath = os.path.basename(nextModelFileWithoutExt)
 
@@ -460,24 +460,24 @@ for nextModelFile in filesToProcess:
         modelID = nextModelFile[:-3]
     else:
         fileExt = nextModelFile[-4:]
-        
+
         allVariantsInvalid = True
-        
+
         # validate before uploading, to prevent unnecessary waiting and traffic
-        for variantName in userVariants["variants"]:    
+        for variantName in userVariants["variants"]:
             variant = userVariants["variants"][variantName]
-            
+
             print("Validating configuration for variant \"" + variantName + "\".")
-            
+
             if (validateJSONWithAPISchema(variant["config"], SchemaJSONPath, False)):
                 allVariantsInvalid = False
-        
+
         if (allVariantsInvalid):
             print("No valid variant configuration found. Terminating.")
             quit()
-                
-        
-        # 2) obtain signed URLs for upload        
+
+
+        # 2) obtain signed URLs for upload
         if (modelLabel != ""):
             uploadURLs = getUploadURLs(fileExt, accessToken, modelLabel,baseUrl)
         else:
@@ -486,7 +486,7 @@ for nextModelFile in filesToProcess:
         if (uploadURLs is None):
             print("Couldn't obtain signed upload URLs from server.")
             quit()
-            
+
 
         # 3) upload model into the "Base Assets" section, or take existing ID
         success = uploadRawModel(nextModelFile, fileExt, uploadURLs, accessToken, baseUrl)
@@ -494,39 +494,39 @@ for nextModelFile in filesToProcess:
         if (success == False):
             print("Couldn't upload base asset.")
             quit()
-            
+
         modelID = uploadURLs['id']
 
 
     # 4) create optimized variants
 
     variantIdx = 0
-    
+
     newRapidModelIDs = []
-    
+
     for variantName in userVariants["variants"]:
-    
+
         variant = userVariants["variants"][variantName]
-        
+
         # check if output folder exists
         if not os.path.isdir("output"):
             os.mkdir("output")
-        
+
         outputModelFilePrefix = "output/" + nextModelFileWithoutExtAndPath + "_" + variantName
-        
+
         print("Producing asset variant \"" + variantName + "\".")
-        
+
         if (validateJSONWithAPISchema(variant["config"], SchemaJSONPath, True)):
             if (validateJSONConfigContent(variant["config"])):
                 resultRapidModelID = generateOptimizedVariant(modelID, outputModelFilePrefix, variant, accessToken, baseUrl)
                 if (resultRapidModelID != -1):
-                    newRapidModelIDs.append(resultRapidModelID) 
+                    newRapidModelIDs.append(resultRapidModelID)
 
         variantIdx += 1
-    
-    
+
+
     # 5) where desired, delete the base asset from the cloud storage after optimization
-    
+
     if (not nextModelFile.endswith(".id")):
         fileExt = nextModelFile[-4:]
         if (cleanup):
@@ -534,4 +534,3 @@ for nextModelFile in filesToProcess:
             deleteBaseAsset(uploadURLs['id'], accessToken)
             for rapidModelID in newRapidModelIDs:
                 deleteRapidModel(rapidModelID, accessToken)
-    
