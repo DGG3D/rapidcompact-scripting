@@ -419,14 +419,14 @@ try:
         userCredentials = json.load(f)
 except:
     print("Unable to load and parse credentials JSON file \"" + credentialsFile + "\". Make sure the file exists and is valid JSON.")
-    quit()
+    sys.exit(1)
 
 try:
     with open(variantsFile) as f:
         userVariants = json.load(f)
 except:
     print("Unable to load and parse variant definitions JSON file \"" + variantsFile + "\". Make sure the file exists and is valid JSON.")
-    quit()
+    sys.exit(1)
 
 
 # 1) obtain token from credentials file
@@ -454,7 +454,7 @@ for nextModelFile in filesToProcess:
 
     if (accessToken == ""):
         print("Couldn't log in. Are your credentials valid?")
-        quit()
+        sys.exit(1)
 
     if (nextModelFile.endswith(".id")):
         modelID = nextModelFile[:-3]
@@ -474,7 +474,7 @@ for nextModelFile in filesToProcess:
 
         if (allVariantsInvalid):
             print("No valid variant configuration found. Terminating.")
-            quit()
+            sys.exit(1)
 
 
         # 2) obtain signed URLs for upload
@@ -485,7 +485,7 @@ for nextModelFile in filesToProcess:
 
         if (uploadURLs is None):
             print("Couldn't obtain signed upload URLs from server.")
-            quit()
+            sys.exit(1)
 
 
         # 3) upload model into the "Base Assets" section, or take existing ID
@@ -493,7 +493,7 @@ for nextModelFile in filesToProcess:
 
         if (success == False):
             print("Couldn't upload base asset.")
-            quit()
+            sys.exit(1)
 
         modelID = uploadURLs['id']
 
