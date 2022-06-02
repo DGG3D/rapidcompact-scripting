@@ -2,7 +2,7 @@
   "$schema": "http://json-schema.org/schema#",
   "$id": "https://api.rapidcompact.com/api/rawmodel/optimize",
   "type": "object",
-  "title": "RapidCompact Optimize Endpoint Configuration Schema v1.1",
+  "title": "RapidCompact Optimize Endpoint Configuration Schema v1.3",
   "description": "Optimization parameters for a single assets (and possibly multiple outputs)",
   "properties": {
     "workflowSettings": {
