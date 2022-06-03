@@ -10,7 +10,6 @@ import urllib.error
 import os
 import json
 import time
-import datetime
 from argparse import ArgumentParser
 
 
@@ -84,7 +83,7 @@ def getServerRequestJSON(request):
     res = response.read().decode("utf8")
     try:
         rJSON = json.loads(res)
-    except e:
+    except:
         print("ERROR: Could not parse the result from server.")
 
     return rJSON, response.getcode()
