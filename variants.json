@@ -35,7 +35,9 @@
                 },
                 "sceneManipulation": {
                     "rotateZUp": false,
-                    "centerModel": false
+                    "centerModel": false,
+                    "removeInvisibleGeometry": false,
+                    "removeSmallFeatures": { "removalPercentage": 0 }
                 },
                 "compressionAndExport": {
                     "fileExports": [

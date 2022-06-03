@@ -2,11 +2,12 @@
   "$schema": "http://json-schema.org/schema#",
   "$id": "https://api.rapidcompact.com/api/rawmodel/optimize",
   "type": "object",
-  "title": "RapidCompact Optimize Endpoint Configuration Schema v1.3",
+  "title": "RapidCompact Optimize Endpoint Configuration Schema v1.4",
   "description": "Optimization parameters for a single assets (and possibly multiple outputs)",
   "properties": {
     "workflowSettings": {
-      "oneOf": [{
+      "oneOf": [
+        {
           "type": "object",
           "title": "Polygon Count Target",
           "description": "Specifies a target mesh resolution via a number of polygons",
@@ -15,7 +16,8 @@
               "type": "object",
               "title": "Target Mesh Resolution",
               "description": "Maximum polygonal resolution for mesh",
-              "oneOf": [{
+              "oneOf": [
+                {
                   "properties": {
                     "faceCount": {
                       "type": "integer",
@@ -23,7 +25,9 @@
                       "minimum": 1
                     }
                   },
-                  "required": ["faceCount"]
+                  "required": [
+                    "faceCount"
+                  ]
                 },
                 {
                   "properties": {
@@ -34,7 +38,9 @@
                       "maximum": 100
                     }
                   },
-                  "required": ["facePercentage"]
+                  "required": [
+                    "facePercentage"
+                  ]
                 }
               ]
             },
@@ -81,7 +87,6 @@
             "targetMeshResolution",
             "targetTextureResolution"
           ]
-
         },
         {
           "type": "object",
@@ -127,7 +132,38 @@
         "centerModel": {
           "type": "boolean",
           "description": "Centers the model around the coordinate origin before export"
-        }
+        },
+        "removeInvisibleGeometry": {
+          "type": "boolean",
+          "description": "Flag to specify if interior invisible geometry should be removed"
+        },
+        "removeSmallFeatures": {
+          "type": "object",
+          "title": "Remove small features",
+          "description": "Removes small meshes below a certain threshold in % or absolute value of the bbox size",
+          "properties": {
+            "removalCount": {
+              "type": "number",
+              "description": "An absolute value for bounding box relative to total bounding box below which meshes are removed",
+              "minimum": 0
+            },
+            "removalPercentage": {
+              "type": "number",
+              "description": "A percentage for bounding box relative to total bounding box below which meshes are removed",
+              "minimum": 0,
+              "maximum": 100
+            }
+          },
+          "oneOf": [
+            {
+              "required": ["removalCount"]
+            },
+            {
+              "required": ["removalPercentage"]
+            }
+          ]
+        },
+        "additionalProperties": false
       },
       "additionalProperties": false
     },
@@ -138,8 +174,8 @@
       "properties": {
         "meshDecimation": {
           "type": "object",
-          "title": "Mesh Decimation Method",
-          "description": "Basic approach for decimation, regarding atlas baking vs. simplification, as well as regarding treatment of scene nodes",
+          "title": "Asset Simplification Method",
+          "description": "Methods for atlas baking, UV preservation and treatment of scene nodes",
           "properties": {
             "method": {
               "enum": [
@@ -175,7 +211,7 @@
             },
             "boundaryPreservationFactor": {
               "type": "number",
-              "description": "Amount of enforced preservation of mesh boundaries (balancing boundary shapre vs. preservation of details elsewhere) ",
+              "description": "Amount of enforced preservation of mesh boundaries (balancing boundary shape vs. preservation of details elsewhere) ",
               "minimum": 0,
               "maximum": 1
             }
