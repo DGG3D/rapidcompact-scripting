@@ -1,5 +1,5 @@
 # rapidcompact-scripting
-A scripting tool for the [RapidCompact REST API](http://rapidcompact.com/doc/restapi/documentation/index.html), based on Python and acting as a command line tool.
+A scripting tool for the [RapidCompact REST API](https://api.rapidcompact.com/docs), based on Python and acting as a command line tool.
 
 This script should serve as demonstration and starting point for your own API-based integration of RapidCompact.
 
