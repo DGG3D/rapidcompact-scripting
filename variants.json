@@ -88,7 +88,8 @@
           "materialAndTextureBaking": {
             "bakingQuality": "medium",
             "bakeNormalMap": true,
-            "bakeAOMap": false
+            "bakeAOMap": false,
+            "aoStrength": 0.85
           }
         },
         "compressionAndExport": {
