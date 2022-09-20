@@ -2,11 +2,12 @@
   "variants": {
     "example_1_20k-faces-2k-maps": {
       "config": {
-        "workflowSettings": {
-          "targetMeshResolution": {
-            "faceCount": 20000
+        "schema": "2.2",
+        "limits": {
+          "faces": {
+            "count": 20000
           },
-          "targetTextureResolution": {
+          "textures": {
             "baseColor": 2048,
             "emissive": 2048,
             "normal": 2048,
@@ -28,7 +29,8 @@
           "materialAndTextureBaking": {
             "bakingQuality": "medium",
             "bakeNormalMap": true,
-            "bakeAOMap": false
+            "bakeAOMap": false,
+            "aoStrength": 0.85
           }
         },
         "sceneManipulation": {
@@ -67,8 +69,9 @@
     },
     "example_2_2mb-max-with-and-without-draco": {
       "config": {
-        "workflowSettings": {
-          "targetMBSize": 2.0
+        "schema": "2.2",
+        "limits": {
+          "megabyte": 2
         },
         "assetSimplification": {
           "meshDecimation": {
