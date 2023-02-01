@@ -19,7 +19,7 @@ sys.path.insert(0, os.path.abspath("schema/"))
 import jsonschema
 
 
-SchemaJSONPath = "schema/workflow_schema_v2_4.schema.json"
+SchemaJSONPath = "schema/workflow_schema_v2_5.schema.json"
 
 
 # ################################ #
