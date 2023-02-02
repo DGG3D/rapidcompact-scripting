@@ -544,5 +544,5 @@ for nextModelFile in filesToProcess:
 
 # Exit with error
 if(exitOnError and failedOptimizations > 0):
-    print("Exiting with error code 42 because of failed optimizations")
-    sys.exit(42)
+    print("Exiting with error because of failed optimizations")
+    sys.exit()
