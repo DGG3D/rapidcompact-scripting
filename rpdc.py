@@ -393,6 +393,7 @@ parser.add_argument("-l", "--label",  dest="modelLabel", default="", help="label
 parser.add_argument("-o", "--origin", dest="originDesc", default="Gallery Uploader Script", help="origin label for the model")
 parser.add_argument('--cleanup',    dest='cleanup', action='store_true')
 parser.add_argument('--no-cleanup', dest='cleanup', action='store_false')
+parser.add_argument("-e", "--exit", dest="exitOnError", default=False, help="exit script on optimize error. Set False or True")
 
 parser.set_defaults(cleanup=True)
 
@@ -406,6 +407,7 @@ modelLabel      = argsDict["modelLabel"]
 originDesc      = argsDict["originDesc"]
 baseUrl         = argsDict["baseUrl"]
 cleanup         = argsDict["cleanup"]
+exitOnError         = argsDict["exitOnError"]
 
 
 print("API Endpoint: "+baseUrl)
@@ -427,6 +429,8 @@ except:
     print("Unable to load and parse variant definitions JSON file \"" + variantsFile + "\". Make sure the file exists and is valid JSON.")
     sys.exit(1)
 
+# For ExitOnError Flag
+failedOptimizations = 0
 
 # 1) obtain token from credentials file
 
@@ -520,6 +524,8 @@ for nextModelFile in filesToProcess:
                 resultRapidModelID = generateOptimizedVariant(modelID, outputModelFilePrefix, variant, accessToken, baseUrl)
                 if (resultRapidModelID != -1):
                     newRapidModelIDs.append(resultRapidModelID)
+                else:
+                    failedOptimizations += 1
 
         variantIdx += 1
 
@@ -533,3 +539,8 @@ for nextModelFile in filesToProcess:
             deleteBaseAsset(uploadURLs['id'], accessToken)
             for rapidModelID in newRapidModelIDs:
                 deleteRapidModel(rapidModelID, accessToken)
+
+# Exit with error
+if(exitOnError and failedOptimizations > 0):
+    print("Exiting with error code 42 because of failed optimizations")
+    sys.exit(42)
