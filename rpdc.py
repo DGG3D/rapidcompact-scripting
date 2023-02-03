@@ -301,9 +301,7 @@ def generateOptimizedVariant(modelID, outputModelFilePrefix, variant, accessToke
             print(f"\rProgress: {barDisplay} {progress}%{pStep}", end = '')
 
         opt_status = rJSON["data"]["optimization_status"]
-        # if (opt_status != "sent_to_queue" and opt_status != "done"):
-        if (opt_status == "sent_to_queue"):
-            print("Debug only - Explicitly trigger error")
+        if (opt_status != "sent_to_queue" and opt_status != "done"):
             print("Error: Unexpected status code from optimization run (" + opt_status + ").")
             return -1
 
