@@ -21,6 +21,8 @@ import jsonschema
 
 SchemaJSONPath = "schema/workflow_schema_v2_5.schema.json"
 
+# ERROR CODES
+OPTIMIZATION_FAILED_ERROR = 2
 
 # ################################ #
 # RapidCompact.Cloud API endpoints #
@@ -543,4 +545,4 @@ for nextModelFile in filesToProcess:
 # Exit with error
 if(exitOnError and failedOptimizations > 0):
     print("Exiting with error because of failed optimizations")
-    sys.exit(42)
+    sys.exit(OPTIMIZATION_FAILED_ERROR)
