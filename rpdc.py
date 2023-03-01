@@ -11,6 +11,7 @@ import os
 import json
 import time
 from argparse import ArgumentParser
+import pathlib
 
 
 # add the six and jsonschema packages (locally, so users don't have to know pip etc.)
@@ -464,7 +465,7 @@ for nextModelFile in filesToProcess:
     if (nextModelFile.endswith(".id")):
         modelID = nextModelFile[:-3]
     else:
-        fileExt = nextModelFile[-4:]
+        fileExt = pathlib.Path(nextModelFile).suffix
 
         allVariantsInvalid = True
 
@@ -487,6 +488,7 @@ for nextModelFile in filesToProcess:
             uploadURLs = getUploadURLs(fileExt, accessToken, modelLabel,baseUrl)
         else:
             uploadURLs = getUploadURLs(fileExt, accessToken, nextModelFileWithoutExt,baseUrl)
+            uploadURLs = getUploadURLs(fileExt, accessToken, nextModelFileWithoutExtAndPath,baseUrl)
 
         if (uploadURLs is None):
             print("Couldn't obtain signed upload URLs from server.")
@@ -535,7 +537,7 @@ for nextModelFile in filesToProcess:
     # 5) where desired, delete the base asset from the cloud storage after optimization
 
     if (not nextModelFile.endswith(".id")):
-        fileExt = nextModelFile[-4:]
+        fileExt = pathlib.Path(nextModelFile).suffix
         if (cleanup):
             print("Cleaning up: deleting uploaded base asset and optimized results. If you want to skip this step, run again with option --no-cleanup.")
             deleteBaseAsset(uploadURLs['id'], accessToken)
