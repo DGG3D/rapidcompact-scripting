@@ -113,13 +113,14 @@ def convert_json_schema_to_cli(auth_token, preset, download_path):
             return False
 
 
-def extract_cli_format_package(file):
+def extract_cli_format_package(file, delete_after_extract):
     print("Unzipping CLI format packages")
     try:
         with zipfile.ZipFile(file, 'r') as z:
             z.extractall(path=file.parent / file.stem)
             z.close()
-        file.unlink()
+        if delete_after_extract:
+            file.unlink()
     except (zipfile.BadZipFile, zipfile.LargeZipFile, OSError):
         print("Error: Downloaded file is not a valid zip archive.")
         return False
@@ -134,6 +135,10 @@ parser.add_argument("-v", "--variants-file", dest="variantsFile", default="varia
                     help="variant definitions JSON file")
 parser.add_argument("-s", "--settings-file", dest="settingsFile", default="settings.json",
                     help="settings JSON file")
+parser.add_argument('--cleanup',    dest='cleanup', action='store_true', help="cleanup downloaded zip files after "
+                                                                              "extracting them (default: True)")
+parser.add_argument('--no-cleanup', dest='cleanup', action='store_false', help="do not cleanup downloaded zip files "
+                                                                               "after extracting them")
 parser.add_argument("-e", "--exit", dest="exitOnError", action='store_true',
                     help="exit script on optimize error. Set False or True")
 
@@ -204,7 +209,7 @@ for variantName in user_variants["variants"]:
     if validate_json_with_api_schema(variant["config"], schema_json_path, False):
         download_target = pathlib.Path('output/' + variantName + '.zip').absolute()
         if convert_json_schema_to_cli(access_token, variant, download_target):
-            extract_cli_format_package(download_target)
+            extract_cli_format_package(download_target, cleanup)
         elif exit_on_error:
             print("Exiting with error because of failed variants conversion")
             sys.exit(1)
