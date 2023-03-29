@@ -20,8 +20,6 @@ sys.path.insert(0, os.path.abspath("schema/"))
 import jsonschema
 
 
-SchemaJSONPath = "schema/workflow_schema_v2_5.schema.json"
-
 # ERROR CODES
 OPTIMIZATION_FAILED_ERROR = 2
 
@@ -392,6 +390,7 @@ parser.add_argument("model",                    help="input directory or 3D mode
 parser.add_argument("-b", "--base-url", dest="baseUrl", default="https://api.rapidcompact.com/api/", help="api base url")
 parser.add_argument("-c", "--credentials-file", dest="credentialsFile", default="credentials.json", help="credentials JSON file")
 parser.add_argument("-v", "--variants-file", dest="variantsFile", default="variants.json", help="variant definitions JSON file")
+parser.add_argument("-s", "--settings-file", dest="settingsFile", default="settings.json", help="settings JSON file")
 parser.add_argument("-l", "--label",  dest="modelLabel", default="", help="label for the model")
 parser.add_argument("-o", "--origin", dest="originDesc", default="Gallery Uploader Script", help="origin label for the model")
 parser.add_argument('--cleanup',    dest='cleanup', action='store_true')
@@ -406,17 +405,19 @@ argsDict = vars(pArgs)
 modelFile       = argsDict["model"]
 variantsFile    = argsDict["variantsFile"]
 credentialsFile = argsDict["credentialsFile"]
+settings_file   = argsDict["settingsFile"]
 modelLabel      = argsDict["modelLabel"]
 originDesc      = argsDict["originDesc"]
 baseUrl         = argsDict["baseUrl"]
 cleanup         = argsDict["cleanup"]
-exitOnError         = argsDict["exitOnError"]
+exitOnError     = argsDict["exitOnError"]
 
 
 print("API Endpoint: "+baseUrl)
 
 userCredentials = None
 userVariants    = None
+settings        = None
 
 try:
     with open(credentialsFile) as f:
@@ -431,6 +432,16 @@ try:
 except:
     print("Unable to load and parse variant definitions JSON file \"" + variantsFile + "\". Make sure the file exists and is valid JSON.")
     sys.exit(1)
+
+try:
+    with open(settings_file) as f:
+        settings = json.load(f)
+except(OSError, json.JSONDecodeError):
+    print("Unable to load and parse settings JSON file \"" + settings_file + "\". Make sure the file exists and is valid JSON.")
+    sys.exit(1)
+
+# Load Settings
+SchemaJSONPath = settings["schemaPath"]
 
 # For ExitOnError Flag
 failedOptimizations = 0
