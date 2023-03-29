@@ -46,8 +46,10 @@ For this you can use the rpdt script in the utils directory of this repository.
 
 3. Edit the "variants.json" file to specify the desired resolution and output formats for your models (or keep it as-is for a first test run).  
   ![Illustration of Step 3](/tutorial/quick-intro/images/step3.JPG)
-4. Open a command line (for example, using Windows PowerShell) to invoke the `rpdt.py` script.
+4. Open a command line (for example, using Windows PowerShell) to invoke the `rpdt.py` script.     
    Example:
-   `python3 utils/rpdt.py`
-   This will request a translated version of your variants.json configuration and place the CLI configuration of it in the output folder.
-5. Open the folders in the output directory to retrieve your cli commands
+   `python3 utils/rpdt.py`     
+   This will request a translated version of your variants.json configuration and place the CLI configuration of it in the output folder.    
+   ![Illustration of Step 4](/tutorial/quick-intro/images/rpdt.png)
+5. Open the folders in the output directory to retrieve your cli commands    
+   ![Illustration of Step 4](/tutorial/quick-intro/images/rpdtOutput.jpg)
