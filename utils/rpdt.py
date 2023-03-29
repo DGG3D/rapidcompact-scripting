@@ -72,8 +72,8 @@ def validate_json_with_api_schema(variant_config, schema_file, silent):
     except (OSError, json.JSONDecodeError):
         if not silent:
             print(
-                "Error: Unable to validate configuration against schema: schema couldn't be read from file \""
-                + schema_file + "\".")
+                f"Error: Unable to validate configuration against schema: "
+                f"schema couldn't be read from file \"{schema_file}\".")
         return False
 
     try:
@@ -106,21 +106,22 @@ def convert_json_schema_to_cli(auth_token, preset, download_path):
         try:
             with open(download_path, 'wb') as f:
                 f.write(response.read())
-            print('Success: CLI Preset written to "' + str(download_path) + '"')
             return True
         except OSError:
-            print("Error: Cannot write to output file \"" + str(download_path) + "\".")
+            print(f"Error: Cannot write to output file \"{str(download_path)}\"")
             return False
 
 
 def extract_cli_format_package(file, delete_after_extract):
-    print("Unzipping CLI format packages")
+    print("Unzipping CLI format packages.")
     try:
         with zipfile.ZipFile(file, 'r') as z:
-            z.extractall(path=file.parent / file.stem)
+            extract_location = file.parent / file.stem
+            z.extractall(path=extract_location)
             z.close()
         if delete_after_extract:
             file.unlink()
+        print(f"Success: CLI format package extracted to \"{str(extract_location)}\".")
     except (zipfile.BadZipFile, zipfile.LargeZipFile, OSError):
         print("Error: Downloaded file is not a valid zip archive.")
         return False
@@ -135,8 +136,8 @@ parser.add_argument("-v", "--variants-file", dest="variantsFile", default="varia
                     help="variant definitions JSON file")
 parser.add_argument("-s", "--settings-file", dest="settingsFile", default="settings.json",
                     help="settings JSON file")
-parser.add_argument('--cleanup',    dest='cleanup', action='store_true', help="cleanup downloaded zip files after "
-                                                                              "extracting them (default: True)")
+parser.add_argument('--cleanup', dest='cleanup', action='store_true', help="cleanup downloaded zip files after "
+                                                                           "extracting them (default: True)")
 parser.add_argument('--no-cleanup', dest='cleanup', action='store_false', help="do not cleanup downloaded zip files "
                                                                                "after extracting them")
 parser.add_argument("-e", "--exit", dest="exitOnError", action='store_true',
@@ -154,7 +155,7 @@ base_url = argsDict["baseUrl"]
 cleanup = argsDict["cleanup"]
 exit_on_error = argsDict["exitOnError"]
 
-print("API Endpoint: " + base_url)
+print(f"API Endpoint: {base_url}")
 
 user_credentials = None
 user_variants = None
@@ -165,8 +166,8 @@ try:
         user_credentials = json.load(f)
 except (OSError, json.JSONDecodeError):
     print(
-        "Unable to load and parse credentials JSON file \"" + credentials_file + "\". Make sure the file exists and is "
-                                                                                 "valid JSON.")
+        f"Unable to load and parse credentials JSON file \"{credentials_file}\". Make sure the file exists and is "
+        "valid JSON.")
     sys.exit(1)
 
 try:
@@ -174,8 +175,8 @@ try:
         user_variants = json.load(f)
 except(OSError, json.JSONDecodeError):
     print(
-        "Unable to load and parse variant definitions JSON file \"" + variants_file + "\". Make sure the file exists "
-                                                                                      "and is valid JSON.")
+        f"Unable to load and parse variant definitions JSON file \"{variants_file}\". Make sure the file exists and is "
+        f"valid JSON.")
     sys.exit(1)
 
 try:
@@ -183,8 +184,7 @@ try:
         settings = json.load(f)
 except(OSError, json.JSONDecodeError):
     print(
-        "Unable to load and parse settings JSON file \"" + settings_file + "\". Make sure the file exists "
-                                                                           "and is valid JSON.")
+        f"Unable to load and parse settings JSON file \"{settings_file}\". Make sure the file exists and is valid JSON.")
     sys.exit(1)
 
 # Load Settings
@@ -204,13 +204,13 @@ if not os.path.isdir("output"):
 for variantName in user_variants["variants"]:
     variant = user_variants["variants"][variantName]
 
-    print("Validating configuration for variant \"" + variantName + "\".")
+    print(f"Validating configuration for variant {variantName}.")
 
     if validate_json_with_api_schema(variant["config"], schema_json_path, False):
         download_target = pathlib.Path('output/' + variantName + '.zip').absolute()
+        print(f"Requesting conversion of {variantName} to CLI format.")
         if convert_json_schema_to_cli(access_token, variant, download_target):
             extract_cli_format_package(download_target, cleanup)
         elif exit_on_error:
             print("Exiting with error because of failed variants conversion")
             sys.exit(1)
-
