@@ -17,8 +17,6 @@ sys.path.insert(0, os.path.abspath("schema/six"))
 sys.path.insert(0, os.path.abspath("schema/"))
 import jsonschema
 
-schema_json_path = "schema/workflow_schema_v2_5.schema.json"
-
 # ################################ #
 # RapidCompact.Cloud API endpoints #
 # ################################ #
@@ -121,6 +119,8 @@ parser.add_argument("-c", "--credentials-file", dest="credentialsFile", default=
                     help="credentials JSON file")
 parser.add_argument("-v", "--variants-file", dest="variantsFile", default="variants.json",
                     help="variant definitions JSON file")
+parser.add_argument("-s", "--settings-file", dest="settingsFile", default="settings.json",
+                    help="settings JSON file")
 parser.add_argument("-e", "--exit", dest="exitOnError", default=False,
                     help="exit script on optimize error. Set False or True")
 
@@ -131,6 +131,7 @@ argsDict = vars(pArgs)
 
 variants_file = argsDict["variantsFile"]
 credentials_file = argsDict["credentialsFile"]
+settings_file = argsDict["settingsFile"]
 base_url = argsDict["baseUrl"]
 cleanup = argsDict["cleanup"]
 exit_on_error = argsDict["exitOnError"]
@@ -139,6 +140,7 @@ print("API Endpoint: " + base_url)
 
 user_credentials = None
 user_variants = None
+settings = None
 
 try:
     with open(credentials_file) as f:
@@ -157,6 +159,18 @@ except(OSError, json.JSONDecodeError):
         "Unable to load and parse variant definitions JSON file \"" + variants_file + "\". Make sure the file exists "
                                                                                       "and is valid JSON.")
     sys.exit(1)
+
+try:
+    with open(settings_file) as f:
+        settings = json.load(f)
+except(OSError, json.JSONDecodeError):
+    print(
+        "Unable to load and parse settings JSON file \"" + settings_file + "\". Make sure the file exists "
+                                                                           "and is valid JSON.")
+    sys.exit(1)
+
+# Load Settings
+schema_json_path = settings["schemaPath"]
 
 # obtain token from credentials file
 access_token = user_credentials["token"]
