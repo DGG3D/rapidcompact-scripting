@@ -23,7 +23,8 @@ import jsonschema
 # ################################ #
 
 LOGIN_ENDPOINT = "login"
-CONVERT_ENDPOINT = "preset/rpdx"
+# use v2 for translation
+CONVERT_ENDPOINT = "v2/preset/rpdx"
 
 
 # ################################ #
