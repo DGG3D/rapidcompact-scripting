@@ -3,6 +3,8 @@ A scripting tool for the [RapidCompact REST API](https://api.rapidcompact.com/do
 
 This script should serve as demonstration and starting point for your own API-based integration of RapidCompact.
 
+## Supported Formatting
+The script's usage of the RapidCompact Upload Endpoint does **not** allow for "loose" files and whenever a 3D format has more than one self-contained file (e.g. glTF with bin file and textures) these need to be in a zip compressed package. In addition the script currently does **not** support sub-directories (e.g. input/myfile/myfile.glb).
 
 ## Basic Usage
 To optimize one or multiple 3D models, to one or multiple target resolutions, simply perform the following steps:
