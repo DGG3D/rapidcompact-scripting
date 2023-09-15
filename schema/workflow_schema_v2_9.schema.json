@@ -262,7 +262,7 @@
             }
           },
           "additionalProperties": false,
-          "required": ["bakeAOMap", "bakeNormalMap", "bakingQuality", "normalsShading", "alphaBlendToMask"]
+          "required": ["bakeAOMap", "bakeNormalMap", "bakingQuality"]
         }
       },
       "additionalProperties": false,
