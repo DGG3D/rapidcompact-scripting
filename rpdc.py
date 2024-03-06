@@ -496,10 +496,9 @@ for nextModelFile in filesToProcess:
 
         # 2) obtain signed URLs for upload
         if (modelLabel != ""):
-            uploadURLs = getUploadURLs(fileExt, accessToken, modelLabel,baseUrl)
+            uploadURLs = getUploadURLs(fileExt, accessToken, modelLabel, baseUrl)
         else:
-            uploadURLs = getUploadURLs(fileExt, accessToken, nextModelFileWithoutExt,baseUrl)
-            uploadURLs = getUploadURLs(fileExt, accessToken, nextModelFileWithoutExtAndPath,baseUrl)
+            uploadURLs = getUploadURLs(fileExt, accessToken, nextModelFileWithoutExtAndPath, baseUrl)
 
         if (uploadURLs is None):
             print("Couldn't obtain signed upload URLs from server.")
