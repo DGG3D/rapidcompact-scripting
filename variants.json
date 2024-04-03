@@ -2,7 +2,7 @@
   "variants": {
     "example_1_20k-faces-2k-maps": {
       "config": {
-        "schema": "2.10",
+        "schema": "2.11",
         "limits": {
           "faces": {
             "count": 20000
@@ -70,7 +70,7 @@
     },
     "example_2_2mb-max-with-and-without-draco": {
       "config": {
-        "schema": "2.10",
+        "schema": "2.11",
         "limits": {
           "megabyte": 2
         },
