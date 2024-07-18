@@ -387,7 +387,7 @@ def validateJSONConfigContent(variantConfig):
 parser = ArgumentParser()
 
 parser.add_argument("model",                    help="input directory or 3D model (must be a .glb file OR .zip file OR base asset ID in the form <number>.id)")
-parser.add_argument("-b", "--base-url", dest="baseUrl", default="https://api.rapidcompact.com/api/", help="api base url")
+parser.add_argument("-b", "--base-url", dest="baseUrl", default="https://api.rapidcompact.com/api/v2/", help="api base url")
 parser.add_argument("-c", "--credentials-file", dest="credentialsFile", default="credentials.json", help="credentials JSON file")
 parser.add_argument("-v", "--variants-file", dest="variantsFile", default="variants.json", help="variant definitions JSON file")
 parser.add_argument("-s", "--settings-file", dest="settingsFile", default="settings.json", help="settings JSON file")
