@@ -129,7 +129,7 @@ def extract_cli_format_package(file, delete_after_extract):
 
 
 parser = ArgumentParser()
-parser.add_argument("-b", "--base-url", dest="baseUrl", default="https://api.rapidcompact.com/api/",
+parser.add_argument("-b", "--base-url", dest="baseUrl", default="https://api.rapidcompact.com/api/v2/",
                     help="api base url")
 parser.add_argument("-c", "--credentials-file", dest="credentialsFile", default="credentials.json",
                     help="credentials JSON file")
