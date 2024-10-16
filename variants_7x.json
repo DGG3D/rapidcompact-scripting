@@ -1,0 +1,160 @@
+{
+  "variants": {
+    "example_1_20k-faces-2k-maps": {
+      "config": {
+        "export": [
+          {
+            "preserveTextureFilenames": false,
+            "reencodeTextures": "auto",
+            "format": {
+              "glb": {
+                "geometryCompression": "none",
+                "excludeTangents": true
+              }
+            }
+          },
+          {
+            "preserveTextureFilenames": false,
+            "reencodeTextures": "auto",
+            "discard": {
+              "unusedUVs": false
+            },
+            "format": {
+              "usdz": {
+                "usdProfile": "arkit",
+                "usdUnits": "cm",
+                "excludeTangents": true,
+                "forceDoubleSidedMeshes": false
+              }
+            }
+          }
+        ],
+        "optimize": {
+          "3dModelOptimizationMethod": {
+            "meshAndMaterialOptimization": {
+              "decimator": {
+                "preserveTopology": false,
+                "preserveNormals": false,
+                "preserveMeshBorders": true,
+                "preserveMaterialBorders": false,
+                "collapseUnconnectedVertices": true,
+                "boundaryPreservationFactor": 0.5,
+                "collapseDistanceThreshold": 0.005,
+                "method": "quadric",
+                "materialOptimization": {
+                  "materialMerger": {
+                    "materialMergingMethod": "auto",
+                    "keepTiledUVs": false,
+                    "tilingThreshold": 1.5,
+                    "materialRegenerator": {
+                      "uvAtlasGenerator": {
+                        "method": "isometric",
+                        "segmentationCutAngle": 88,
+                        "segmentationChartAngle": 130,
+                        "maxAngleError": 114,
+                        "maxPrimitivesPerChart": 10000,
+                        "cutOverlappingPieces": true,
+                        "atlasMode": "separateAlpha",
+                        "allowRectangularAtlases": false,
+                        "packingResolution": 1024,
+                        "packingPixelDistance": 2,
+                        "atlasFactor": 1,
+                        "textureBaker": {
+                          "sampleCount": 4,
+                          "texMapAutoScaling": true,
+                          "bakeCombinedScene": false,
+                          "topologicalHolesToAlpha": false,
+                          "powerOfTwoResolution": "ceil",
+                          "inpaintingRadius": 32,
+                          "normalMap": {
+                            "mode": "always",
+                            "recomputeNormals": true,
+                            "skipNormalsRoughnessThreshold": 0,
+                            "normalMapScale": 1,
+                            "tangentSpace": true
+                          },
+                          "bakingResolution": {
+                            "default": 2048,
+                            "baseColor": 2048,
+                            "opacity": 2048,
+                            "normal": 2048,
+                            "metallic": 2048,
+                            "roughness": 2048,
+                            "emissive": 2048,
+                            "occlusion": 2048,
+                            "displacement": 2048,
+                            "clearcoat": 2048,
+                            "clearcoatColor": 2048,
+                            "clearcoatRoughness": 2048,
+                            "clearcoatSpecularLevel": 2048,
+                            "clearcoatNormal": 2048,
+                            "transmission": 2048,
+                            "thickness": 2048,
+                            "attenuationColor": 2048,
+                            "scatteringColor": 2048,
+                            "scatteringDistanceScale": 2048,
+                            "sheenColor": 2048,
+                            "sheenRoughness": 2048,
+                            "sheenOpacity": 2048,
+                            "specularColor": 2048,
+                            "specularValue": 2048,
+                            "anisotropy": 2048,
+                            "anisotropyAngle": 2048,
+                            "iridescence": 2048,
+                            "iridescenceThickness": 2048
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "target": {
+                  "faces": {
+                    "value": 20000
+                  },
+                  "deviation": {
+                    "percentage": 0
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "example_2_2mb-max-with-and-without-draco": {
+      "config": {
+        "export": [
+          {
+            "preserveTextureFilenames": false,
+            "reencodeTextures": "auto",
+            "format": {
+              "glb": {
+                "geometryCompression": "none",
+                "excludeTangents": true
+              }
+            }
+          },
+          {
+            "preserveTextureFilenames": false,
+            "reencodeTextures": "auto",
+            "discard": {
+              "unusedUVs": false
+            },
+            "format": {
+              "glb": {
+                "geometryCompression": "draco",
+                "excludeTangents": true
+              }
+            }
+          }
+        ],
+        "modifier": {
+          "filesize": {
+            "maxMegabytesOnDisk": 2
+          }
+        }
+      }
+    }
+  }
+}
