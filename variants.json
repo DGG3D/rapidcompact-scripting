@@ -2,123 +2,132 @@
   "variants": {
     "example_1_20k-faces-2k-maps": {
       "config": {
-        "schema": "2.13",
-        "limits": {
-          "faces": {
-            "count": 20000
-          },
-          "textures": {
-            "baseColor": 2048,
-            "emissive": 2048,
-            "normal": 2048,
-            "orm": 2048
-          }
-        },
-        "assetSimplification": {
-          "meshDecimation": {
-            "method": "rebake"
-          },
-          "topologySettings": {
-            "vertexMergingDistance": 0.05,
-            "meshDensityEqualization": 0,
-            "boundaryPreservationFactor": 0.5
-          },
-          "uvAndAtlasSettings": {
-            "uvStretchTolerance": 0,
-            "atlasingFactor": 1
-          },
-          "materialAndTextureBaking": {
-            "bakingQuality": "medium",
-            "bakeNormalMap": true,
-            "bakeAOMap": false,
-            "aoStrength": 0.85
-          }
-        },
-        "sceneManipulation": {
-          "rotateZUp": false,
-          "centerModel": false,
-          "removeInvisibleGeometry": false,
-          "removeSmallFeatures": { "removalPercentage": 0 }
-        },
-        "compressionAndExport": {
-          "fileExports": [
-            {
-              "fileType": "glb",
-              "meshCompressionMethod": "none",
-              "customScaling": 1,
-              "textureFormat": {
-                "baseColor": "auto",
-                "emissive": "auto",
-                "normal": "auto",
-                "orm": "auto"
-              }
-            },
-            {
-              "fileType": "usdz",
-              "meshCompressionMethod": "none",
-              "customScaling": 1,
-              "textureFormat": {
-                "baseColor": "auto",
-                "emissive": "auto",
-                "normal": "auto",
-                "orm": "auto"
+        "export": [
+          {
+            "preserveTextureFilenames": false,
+            "reencodeTextures": "auto",
+            "format": {
+              "glb": {
+                "geometryCompression": "none",
+                "excludeTangents": true,
+                "pbrMaterial": {
+                  "separateOcclusionMap": false,
+                  "excludePbrExtensions": false,
+                  "forceDoubleSidedMaterials": false,
+                  "forceUnlitMaterials": false,
+                  "convertMetalRoughness": false,
+                  "maxTextureResolution": {
+                    "default": 2048
+                  }
+                }
               }
             }
-          ]
+          },
+          {
+            "preserveTextureFilenames": false,
+            "reencodeTextures": "auto",
+            "discard": {
+              "unusedUVs": false
+            },
+            "format": {
+              "usdz": {
+                "usdProfile": "arkit",
+                "usdUnits": "cm",
+                "excludeTangents": true,
+                "forceDoubleSidedMeshes": false,
+                "usdPreviewSurface": {
+                  "maxTextureResolution": {
+                    "default": 2048
+                  }
+                }
+              }
+            }
+          }
+        ],
+        "optimize": {
+          "3dModelOptimizationMethod": {
+            "meshAndMaterialOptimization": {
+              "decimator": {
+                "preserveTopology": false,
+                "preserveNormals": false,
+                "preserveMeshBorders": true,
+                "preserveMaterialBorders": false,
+                "collapseUnconnectedVertices": true,
+                "boundaryPreservationFactor": 0.5,
+                "collapseDistanceThreshold": 0.005,
+                "method": "quadric",
+                "materialOptimization": {
+                  "materialMerger": {
+                    "materialMergingMethod": "auto",
+                    "keepTiledUVs": false,
+                    "tilingThreshold": 1.5,
+                    "materialRegenerator": {
+                      "uvAtlasGenerator": {
+                        "method": "isometric",
+                        "segmentationCutAngle": 88,
+                        "segmentationChartAngle": 130,
+                        "maxAngleError": 114,
+                        "maxPrimitivesPerChart": 10000,
+                        "cutOverlappingPieces": true,
+                        "atlasMode": "separateAlpha",
+                        "allowRectangularAtlases": false,
+                        "packingResolution": 1024,
+                        "packingPixelDistance": 2,
+                        "atlasFactor": 1,
+                        "textureBaker": {
+                          "sampleCount": 4,
+                          "texMapAutoScaling": true,
+                          "bakeCombinedScene": false,
+                          "topologicalHolesToAlpha": false,
+                          "powerOfTwoResolution": "ceil",
+                          "inpaintingRadius": 32
+                        }
+                      }
+                    }
+                  }
+                },
+                "target": {
+                  "faces": {
+                    "value": 20000
+                  }
+                }
+              }
+            }
+          }
         }
       }
     },
     "example_2_2mb-max-with-and-without-draco": {
       "config": {
-        "schema": "2.13",
-        "limits": {
-          "megabyte": 2
-        },
-        "assetSimplification": {
-          "meshDecimation": {
-            "method": "rebake"
-          },
-          "topologySettings": {
-            "vertexMergingDistance": 0.05,
-            "meshDensityEqualization": 0,
-            "boundaryPreservationFactor": 0.5
-          },
-          "uvAndAtlasSettings": {
-            "uvStretchTolerance": 0,
-            "atlasingFactor": 1
-          },
-          "materialAndTextureBaking": {
-            "bakingQuality": "medium",
-            "bakeNormalMap": true,
-            "bakeAOMap": false,
-            "aoStrength": 0.85
-          }
-        },
-        "compressionAndExport": {
-          "fileExports": [
-            {
-              "fileType": "glb",
-              "meshCompressionMethod": "none",
-              "customScaling": 1,
-              "textureFormat": {
-                "baseColor": "auto",
-                "emissive": "auto",
-                "normal": "auto",
-                "orm": "auto"
-              }
-            },
-            {
-              "fileType": "glb",
-              "meshCompressionMethod": "dracoLossy",
-              "customScaling": 1,
-              "textureFormat": {
-                "baseColor": "auto",
-                "emissive": "auto",
-                "normal": "auto",
-                "orm": "auto"
+        "export": [
+          {
+            "preserveTextureFilenames": false,
+            "reencodeTextures": "auto",
+            "format": {
+              "glb": {
+                "geometryCompression": "none",
+                "excludeTangents": true
               }
             }
-          ]
+          },
+          {
+            "preserveTextureFilenames": false,
+            "reencodeTextures": "auto",
+            "discard": {
+              "unusedUVs": false
+            },
+            "format": {
+              "glb": {
+                "geometryCompression": "draco",
+                "excludeTangents": true
+              }
+            }
+          }
+        ],
+        "modifier": {
+          "filesize": {
+            "maxMegabytesOnDisk": 2.0
+          }
         }
       }
     }

@@ -313,7 +313,7 @@ def generateOptimizedVariant(modelID, outputModelFilePrefix, variant, accessToke
     barDisplayFinal = makeProgessBarStr(100)
     print(f"\rProgress: {barDisplayFinal} 100%  |  Finished.                               \n", end = '')
 
-    exports      = variant["config"]["compressionAndExport"]["fileExports"]
+    exports      = variant["config"]["export"]
     downloadURLs = rJSON["data"]["downloads"]["all"]
 
     # name and download results
@@ -324,7 +324,7 @@ def generateOptimizedVariant(modelID, outputModelFilePrefix, variant, accessToke
     i = 0
     for key in downloadURLs:
         dlURL    = downloadURLs[key]
-        fileType = exports[i]["fileType"]
+        fileType = next(iter(exports[i]["format"]))
 
         fileExt  = fileType
         if (fileType == "obj" or fileType == "gltf"):
@@ -364,18 +364,6 @@ def validateJSONWithAPISchema(variantConfig, schemaFile, silent):
     return False
 
 # #############################################################################
-
-def validateJSONConfigContent(variantConfig):
-    exports = variantConfig["compressionAndExport"]["fileExports"]
-
-    exportType0 = exports[0]["fileType"]
-
-    # the V1 currently expects the first export to always be in glb format
-    if (exportType0 != "glb"):
-        print("Error when checking additional constraint: With API V1, first export must be \"glb\" (given: \"" + exportType0 + "\").")
-        return False
-
-    return True
 
 
 # ################################ #
@@ -533,13 +521,12 @@ for nextModelFile in filesToProcess:
 
         print("Producing asset variant \"" + variantName + "\".")
 
-        if (validateJSONWithAPISchema(variant["config"], SchemaJSONPath, True)):
-            if (validateJSONConfigContent(variant["config"])):
-                resultRapidModelID = generateOptimizedVariant(modelID, outputModelFilePrefix, variant, accessToken, baseUrl)
-                if (resultRapidModelID != -1):
-                    newRapidModelIDs.append(resultRapidModelID)
-                else:
-                    failedOptimizations += 1
+        if (validateJSONWithAPISchema(variant["config"], SchemaJSONPath, True)):        
+            resultRapidModelID = generateOptimizedVariant(modelID, outputModelFilePrefix, variant, accessToken, baseUrl)
+            if (resultRapidModelID != -1):
+                newRapidModelIDs.append(resultRapidModelID)
+            else:
+                failedOptimizations += 1
 
         variantIdx += 1
 
