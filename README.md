@@ -1,4 +1,7 @@
 # rapidcompact-scripting
+
+> ⚠️ **Note**: An updated API example is available at [RapidPipeline API Sample](https://github.com/DGG3D/rapidpipeline-api-sample). While this script remains functional, we recommend checking out the new example for the latest features and best practices.
+
 A scripting tool for the [RapidCompact REST API](https://api.rapidcompact.com/docs), based on Python and acting as a command line tool.
 
 This script should serve as demonstration and starting point for your own API-based integration of RapidCompact.
